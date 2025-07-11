@@ -414,7 +414,6 @@ const getAttendanceLogs = async (req, res) => {
 //   }
 // };
 
-
 const approveLabour = async (req, res) => {
   try {
     let { projectId, deviceId } = req.body;          // projectId may be ID or name
@@ -1122,7 +1121,7 @@ const getAllLaboursWithTransferDetails = async (req, res) => {
 
     // SQL query to fetch transfer site names and createdAt for the provided labour IDs
     const query = `
-      SELECT LabourID, transferSiteName, currentSiteName, createdAt 
+      SELECT LabourID, transferSiteName, currentSiteName, createdAt, siteTransferBy, esslResponseStatus
       FROM [dbo].[API_TransferSite] 
       WHERE LabourID IN (${labourIds.map((id) => `'${id}'`).join(', ')})
     `;
@@ -2879,6 +2878,135 @@ const getSuperAdminProjectNames = async (req, res) => {
 
 // ------------------------------------------------------------------------------    COMPANY TRANSFER FUNCTION END -------------------------------------------------
 
+const getLabourAttendanceCheck = async (req, res) => {
+  try {
+    const { labourId } = req.query;
+
+    if (!labourId) {
+      return res.status(400).json({ message: 'LabourID is required.' });
+    }
+
+    const pool = await poolPromise;
+
+    const query = `
+      SELECT TOP 1 [CreatedAt]
+      FROM [dbo].[LabourAttendanceLogs]
+      WHERE LabourID = @labourId
+      ORDER BY CreatedAt DESC
+    `;
+
+    const result = await pool
+      .request()
+      .input('labourId', labourId)
+      .query(query);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: 'No attendance logs found for this LabourID.' });
+    }
+
+    const lastAttendanceDate = result.recordset[0].CreatedAt;
+
+    res.status(200).json({ lastAttendanceDate });
+  } catch (error) {
+    console.error('Error fetching labour attendance data:', error);
+    res.status(500).json({
+      message: 'Failed to fetch attendance data.',
+      error: error.message,
+    });
+  }
+};
+
+const addDevicesToProject = async (req, res) => {
+  try {
+    const { projectId, deviceIds } = req.body;           // deviceIds is now an array
+    if (!projectId || !Array.isArray(deviceIds) || !deviceIds.length) {
+      return res.status(400).json({ success: false, message: 'projectId & deviceIds[] required' });
+    }
+
+    // 1️⃣  Resolve project once
+    const poolBU = await poolPromise4;
+    const project = await poolBU.request()
+      .input('pid', sql.Int, projectId)
+      .query(`SELECT Id, Description FROM Framework.BusinessUnit WHERE Id = @pid`);
+    if (!project.recordset[0]) {
+      return res.status(400).json({ success: false, message: 'Invalid projectId' });
+    }
+    const { Description: BusinessUnit } = project.recordset[0];
+
+    // 2️⃣  Get device meta for every id in one go
+    const poolDev   = await poolPromise3;
+    const deviceRes = await poolDev.request()
+      .query(`SELECT DeviceID, DeviceSName, DeviceLocation, SerialNumber
+              FROM dbo.Devices 
+              WHERE DeviceID IN (${deviceIds.join(',')})`);
+
+    // Simple check that all requested devices exist
+    const foundIds = deviceRes.recordset.map(r => r.DeviceID);
+    const missing  = deviceIds.filter(id => !foundIds.includes(id));
+    if (missing.length)
+      return res.status(400).json({ success: false, message: `Invalid DeviceID(s): ${missing.join(',')}` });
+
+    // 3️⃣  Insert rows in one transaction
+    const poolLink = await poolPromise;
+    const tx       = new sql.Transaction(poolLink);
+    await tx.begin();
+    try {
+      const ps = new sql.PreparedStatement(tx);
+      ps.input('ProjectID',     sql.Int);
+      ps.input('DeviceID',      sql.Int);
+      ps.input('BusinessUnit',  sql.NVarChar);
+      ps.input('DeviceSName',   sql.NVarChar);
+      ps.input('DeviceLocation',sql.NVarChar);
+      ps.input('SerialNumber',  sql.NVarChar);
+      ps.input('Status',        sql.NVarChar);
+
+      await ps.prepare(`
+        INSERT INTO ProjectDeviceStatus
+              (ProjectID, DeviceID, BusinessUnit, DeviceSName, DeviceLocation, SerialNumber, Status)
+        VALUES (@ProjectID, @DeviceID, @BusinessUnit, @DeviceSName, @DeviceLocation, @SerialNumber, @Status)
+      `);
+
+      for (const d of deviceRes.recordset) {
+        await ps.execute({
+          ProjectID     : projectId,
+          DeviceID      : d.DeviceID,
+          BusinessUnit  ,
+          DeviceSName   : d.DeviceSName,
+          DeviceLocation: d.DeviceLocation,
+          SerialNumber  : d.SerialNumber,
+          Status        : 'Active'
+        });
+      }
+      await ps.unprepare();
+      await tx.commit();
+      return res.status(200).json({ success: true, inserted: deviceIds.length });
+    } catch (err) {
+      console.error(err);                     // always log
+      await tx.rollback();
+      return res.status(500).json({ success: false, message: 'DB insert failed' });
+    }
+  } catch (err) {                             // only catch fatal errors here
+    console.error(err);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+
+const getDevicesByProject = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const pool = await poolPromise;
+    const list = await pool.request()
+      .input('pid', sql.Int, projectId)
+      .query(`SELECT DeviceID, DeviceSName, DeviceLocation, SerialNumber, Status
+              FROM ProjectDeviceStatus WHERE ProjectID = @pid`);
+    return res.status(200).json({ success: true, data: list.recordset });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+};
+
 
 
 module.exports = {
@@ -2920,7 +3048,11 @@ module.exports = {
   approveCompanyTransfer,
   rejectCompanyTransfer,
   editCompanyTransfer,
-  getSuperAdminProjectNames
+  getSuperAdminProjectNames,
+  getLabourAttendanceCheck,
+
+  addDevicesToProject,
+  getDevicesByProject
 };
 
 

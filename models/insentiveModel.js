@@ -313,7 +313,7 @@ const getVariablePayAndLabourOnboardingJoin = async (filters = {}) => {
         ON 
             onboarding.LabourID = variablepay.LabourID
         WHERE 
-            onboarding.status = 'Approved'
+            onboarding.status IN ('Approved', 'Disable')
     `;
 
     // 🔍 Handle ProjectID filter (comma-separated)
@@ -852,7 +852,7 @@ async function getVariablePayByDateRange(projectName, startDate, endDate, approv
             : ""
         }
         WHERE 
-            onboarding.status = 'Approved'
+            onboarding.status IN ('Approved', 'Disable')
             ${projectName !== "all" ? "AND onboarding.projectName = @projectName" : ""}
     )
     SELECT 
@@ -1550,7 +1550,7 @@ async function getVariablePayForLabour(labourId, month, year) {
     } catch (error) {
         console.error('Error in getVariablePayForLabour:', error);
         throw error;
-    }
+    }   
 };
 
 // async function getWageInfoForLabour(labourId, month, year) {
@@ -2054,148 +2054,62 @@ function calculatePartialWage(wageRecord, daysApplicable, daysInMonth) {
     return 0;
 }
 
-
-// async function getWageInfoForLabour(labourId, month, year) {
-//     try {
-//         const pool = await poolPromise;
-
-//         // Fetch all wage entries for the labour within the desired month and year
-//         const result = await pool.request()
-//             .input('labourId', sql.NVarChar, labourId)
-//             .input('month', sql.Int, month)
-//             .input('year', sql.Int, year)
-//             .query(`
-//               SELECT
-//                 WageID,
-//                 FromDate,
-//                 ApprovalDate,
-//                 EffectiveDate,
-//                 PayStructure,
-//                 DailyWages,
-//                 PerHourWages,
-//                 MonthlyWages,
-//                 YearlyWages,
-//                 WeeklyOff,
-//                 FixedMonthlyWages
-//               FROM [dbo].[LabourMonthlyWages]
-//               WHERE
-//                   LabourID = @labourId
-//                   AND isApprovalDoneAdmin = 1
-//                   AND (YEAR(FromDate) < @year OR (YEAR(FromDate) = @year AND MONTH(FromDate) <= @month))
-//                   AND (YEAR(ApprovalDate) < @year OR (YEAR(ApprovalDate) = @year AND MONTH(ApprovalDate) <= @month))
-//               ORDER BY FromDate DESC, ApprovalDate DESC;
-//             `);
-
-//         if (!result.recordset.length) {
-//             return null; // No wages found for this labour
-//         }
-
-//         let applicableWage = null;
-//         let previousWage = null;
-
-//         for (const wage of result.recordset) {
-//             const fromDate = new Date(wage.FromDate);
-//             const approvalDate = new Date(wage.ApprovalDate);
-
-//             if (
-//                 (fromDate.getFullYear() < year || (fromDate.getFullYear() === year && fromDate.getMonth() + 1 <= month)) &&
-//                 (approvalDate.getFullYear() < year || (approvalDate.getFullYear() === year && approvalDate.getMonth() + 1 <= month))
-//             ) {
-//                 if (!applicableWage) {
-//                     applicableWage = wage;
-//                 } else if (!previousWage) {
-//                     previousWage = wage; // Store the previous wage
-//                 }
-//             }
-//         }
-
-//         if (!applicableWage) {
-//             return null; // No applicable wage entry found
-//         }
-
-//         const daysInMonth = new Date(year, month, 0).getDate();
-//         const fromDate = new Date(applicableWage.FromDate);
-//         const effectiveDate = applicableWage.EffectiveDate ? new Date(applicableWage.EffectiveDate) : null;
-
-//         let previousDaysApplicable = 0;
-//         let currentDaysApplicable = daysInMonth;
-
-//         if (fromDate.getFullYear() === year && fromDate.getMonth() + 1 === month) {
-//             previousDaysApplicable = fromDate.getDate() - 1;
-//             currentDaysApplicable = daysInMonth - previousDaysApplicable;
-//         }
-
-//         if (effectiveDate && effectiveDate.getFullYear() === year && effectiveDate.getMonth() + 1 === month) {
-//             previousDaysApplicable = effectiveDate.getDate() - 1;
-//             currentDaysApplicable = daysInMonth - previousDaysApplicable;
-//         }
-
-//         let calculatedWages = {
-//             previousWageAmount: 0,
-//             currentWageAmount: 0,
-//             totalWageAmount: 0
-//         };
-
-//         if (previousWage) {
-//             if (previousWage.PayStructure.toLowerCase().includes('daily')) {
-//                 calculatedWages.previousWageAmount = previousWage.DailyWages * previousDaysApplicable;
-//             } else if (previousWage.FixedMonthlyWages) {
-//                 calculatedWages.previousWageAmount = (previousWage.FixedMonthlyWages / daysInMonth) * previousDaysApplicable;
-//             } else {
-//                 calculatedWages.previousWageAmount = (previousWage.MonthlyWages / daysInMonth) * previousDaysApplicable;
-//             }
-//         }
-
-//         if (applicableWage.PayStructure.toLowerCase().includes('daily')) {
-//             calculatedWages.currentWageAmount = applicableWage.DailyWages * currentDaysApplicable;
-//         } else if (applicableWage.FixedMonthlyWages) {
-//             calculatedWages.currentWageAmount = (applicableWage.FixedMonthlyWages / daysInMonth) * currentDaysApplicable;
-//         } else {
-//             calculatedWages.currentWageAmount = (applicableWage.MonthlyWages / daysInMonth) * currentDaysApplicable;
-//         }
-
-//         calculatedWages.totalWageAmount = calculatedWages.previousWageAmount + calculatedWages.currentWageAmount;
-
-//         return {
-//             ...applicableWage,
-//             previousWage,
-//             previousDaysApplicable,
-//             currentDaysApplicable,
-//             calculatedWages
-//         };
-//     } catch (error) {
-//         console.error('Error in getWageInfoForLabour:', error);
-//         throw error;
-//     }
-// };
-
-
-/**
- * Return list of labour IDs who are eligible for salary generation in a given month/year.
- * - They must have at least 1 present/half day (i.e. not absent full month).
- * - They must have wages added in [LabourMonthlyWages].
- */
-
 async function getEligibleLabours(month, year, idsArray) {
     try {
         const pool = await poolPromise;
-        const request = pool.request();
-        request.input('month', sql.Int, month);
-        request.input('year', sql.Int, year);
 
+        // Step 1: Get LabourIDs from labourOnboarding according to the logic
+        let onboardingQuery = `
+            SELECT LabourID, status
+            FROM [labourOnboarding]
+            WHERE status IN ('Approved', 'Disable')
+            ${idsArray && idsArray.length > 0 ? "AND LabourID IN (SELECT value FROM STRING_SPLIT(@labourIds, ','))" : ""}
+        `;
+
+        const onboardingRequest = pool.request();
         if (idsArray && idsArray.length > 0) {
-            request.input('labourIds', sql.VarChar, idsArray.join(','));
+            onboardingRequest.input('labourIds', sql.VarChar, idsArray.join(','));
         }
 
+        const onboardingResult = await onboardingRequest.query(onboardingQuery);
+console.log("onboardingResult", onboardingResult.recordset);
+        const labourMap = {};
+
+        onboardingResult.recordset.forEach(row => {
+            const id = row.LabourID;
+            if (!labourMap[id]) {
+                labourMap[id] = [];
+            }
+            labourMap[id].push(row.status);
+        });
+
+        const eligibleLabourIds = [];
+
+        for (const id in labourMap) {
+            const statuses = labourMap[id];
+            if (statuses.length > 1 && statuses.includes('Approved')) {
+                eligibleLabourIds.push(id); // multiple, pick Approved
+            } else if (statuses.length === 1) {
+                eligibleLabourIds.push(id); // only one, allow even if Disable
+            }
+        }
+
+        if (eligibleLabourIds.length === 0) {
+            return [];
+        }
+
+        const attendanceRequest = pool.request();
+        attendanceRequest.input('month', sql.Int, month);
+        attendanceRequest.input('year', sql.Int, year);
+        attendanceRequest.input('labourIds', sql.VarChar, eligibleLabourIds.join(','));
+
         const query = `
-            -- Step 1: Get Attendance Count for all LabourIds
             WITH AttendanceCTE AS (
                 SELECT 
                     LabourId,
                     SUM(
                         CASE 
-                            WHEN [Status] IN ('P', 'HD', 'H', 'MP', 'O') 
-                            THEN 1 
+                            WHEN [Status] IN ('P', 'HD', 'H', 'MP', 'O') THEN 1 
                             ELSE 0
                         END
                     ) AS AttendanceCount
@@ -2204,42 +2118,50 @@ async function getEligibleLabours(month, year, idsArray) {
                     MONTH([Date]) = @month
                     AND YEAR([Date]) = @year
                 GROUP BY LabourId
+            ),
+            RankedLabours AS (
+                SELECT 
+                    onboarding.id,
+                    onboarding.LabourID AS LabourId,
+                    onboarding.name,
+                    onboarding.businessUnit,
+                    onboarding.projectName,
+                    onboarding.departmentName,
+                    onboarding.department,
+                    onboarding.workingHours,
+                    onboarding.aadhaarNumber,
+                    onboarding.accountNumber,
+                    onboarding.status,
+                    AttendanceCTE.AttendanceCount,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY onboarding.LabourID
+                        ORDER BY CASE 
+                            WHEN onboarding.status = 'Approved' THEN 1
+                            WHEN onboarding.status = 'Disable' THEN 2
+                            ELSE 3
+                        END
+                    ) AS rn
+                FROM 
+                    [labourOnboarding] AS onboarding
+                INNER JOIN 
+                    AttendanceCTE ON AttendanceCTE.LabourId = onboarding.LabourID
+                WHERE 
+                    onboarding.status IN ('Approved', 'Disable')
+                    AND AttendanceCTE.AttendanceCount > 0
+                    AND NOT EXISTS (
+                        SELECT 1 
+                        FROM [dbo].[FinalizedSalaryPay] AS finalized
+                        WHERE 
+                            finalized.LabourID = onboarding.LabourID
+                            AND finalized.[Month] = @month
+                            AND finalized.[Year] = @year
+                    )
+                    AND onboarding.LabourID IN (SELECT value FROM STRING_SPLIT(@labourIds, ','))
             )
-            -- Step 2: Get all eligible labours who are not finalized
-            SELECT 
-                onboarding.id,
-                onboarding.LabourID AS LabourId,
-                onboarding.name,
-                onboarding.businessUnit,
-                onboarding.projectName,
-                onboarding.departmentName,
-                onboarding.department,
-                onboarding.workingHours,
-                onboarding.aadhaarNumber,
-                onboarding.accountNumber,
-                AttendanceCTE.AttendanceCount
-            FROM 
-                AttendanceCTE
-            INNER JOIN 
-                [labourOnboarding] AS onboarding
-                ON AttendanceCTE.LabourId = onboarding.LabourID
-            WHERE 
-                onboarding.status IN ('Approved', 'Disable')
-                AND AttendanceCTE.AttendanceCount > 0
-                AND NOT EXISTS (
-                    SELECT 1 
-                    FROM [dbo].[FinalizedSalaryPay] AS finalized
-                    WHERE 
-                        finalized.LabourID = AttendanceCTE.LabourId
-                        AND finalized.[Month] = @month
-                        AND finalized.[Year] = @year
-                )
-                ${(idsArray && idsArray.length > 0) ? "AND onboarding.LabourID IN (SELECT value FROM STRING_SPLIT(@labourIds, ','))" : ""}
-            ORDER BY 
-                onboarding.LabourID;
+            SELECT * FROM RankedLabours WHERE rn = 1 ORDER BY LabourId;
         `;
 
-        const result = await request.query(query);
+        const result = await attendanceRequest.query(query);
 
         const labourDetails = result.recordset.map(row => ({
             id: row.id,
@@ -2251,7 +2173,8 @@ async function getEligibleLabours(month, year, idsArray) {
             department: row.department,
             aadhaarNumber: row.aadhaarNumber,
             accountNumber: row.accountNumber,
-            attendanceCount: row.AttendanceCount
+            attendanceCount: row.AttendanceCount,
+            status: row.status
         }));
 
         return labourDetails;
@@ -2260,7 +2183,7 @@ async function getEligibleLabours(month, year, idsArray) {
         console.error('Error in getEligibleLabours:', error);
         throw error;
     }
-};
+}
 
 
 // async function getEligibleLabours(month, year, idsArray) {
@@ -2270,12 +2193,12 @@ async function getEligibleLabours(month, year, idsArray) {
 //         request.input('month', sql.Int, month);
 //         request.input('year', sql.Int, year);
 
-//         // Add the idsArray to the query if provided
 //         if (idsArray && idsArray.length > 0) {
 //             request.input('labourIds', sql.VarChar, idsArray.join(','));
 //         }
 
 //         const query = `
+//             -- Step 1: Get Attendance Count for all LabourIds
 //             WITH AttendanceCTE AS (
 //                 SELECT 
 //                     LabourId,
@@ -2292,6 +2215,7 @@ async function getEligibleLabours(month, year, idsArray) {
 //                     AND YEAR([Date]) = @year
 //                 GROUP BY LabourId
 //             )
+//             -- Step 2: Get all eligible labours who are not finalized
 //             SELECT 
 //                 onboarding.id,
 //                 onboarding.LabourID AS LabourId,
@@ -2300,16 +2224,26 @@ async function getEligibleLabours(month, year, idsArray) {
 //                 onboarding.projectName,
 //                 onboarding.departmentName,
 //                 onboarding.department,
+//                 onboarding.workingHours,
+//                 onboarding.aadhaarNumber,
+//                 onboarding.accountNumber,
 //                 AttendanceCTE.AttendanceCount
 //             FROM 
 //                 AttendanceCTE
 //             INNER JOIN 
 //                 [labourOnboarding] AS onboarding
-//             ON 
-//                 AttendanceCTE.LabourId = onboarding.LabourID
+//                 ON AttendanceCTE.LabourId = onboarding.LabourID
 //             WHERE 
-//                 onboarding.status = 'Approved'
+//                 onboarding.status IN ('Approved', 'Disable')
 //                 AND AttendanceCTE.AttendanceCount > 0
+//                 AND NOT EXISTS (
+//                     SELECT 1 
+//                     FROM [dbo].[FinalizedSalaryPay] AS finalized
+//                     WHERE 
+//                         finalized.LabourID = AttendanceCTE.LabourId
+//                         AND finalized.[Month] = @month
+//                         AND finalized.[Year] = @year
+//                 )
 //                 ${(idsArray && idsArray.length > 0) ? "AND onboarding.LabourID IN (SELECT value FROM STRING_SPLIT(@labourIds, ','))" : ""}
 //             ORDER BY 
 //                 onboarding.LabourID;
@@ -2317,73 +2251,37 @@ async function getEligibleLabours(month, year, idsArray) {
 
 //         const result = await request.query(query);
 
-// // ------------------------------------------------------------------------------   START   ---------------------------------------------------------------------------------------------        
-//         // Just an example. Adjust to your table and columns:
-//         // const result = await pool.request()
-//         //     .input('month', sql.Int, month)
-//         //     .input('year', sql.Int, year)  
+//         const labourDetails = result.recordset.map(row => ({
+//             id: row.id,
+//             labourId: row.LabourId,
+//             name: row.name,
+//             businessUnit: row.businessUnit,
+//             projectName: row.projectName,
+//             departmentName: row.departmentName,
+//             department: row.department,
+//             aadhaarNumber: row.aadhaarNumber,
+//             accountNumber: row.accountNumber,
+//             attendanceCount: row.AttendanceCount,
+//             status: row.status
+//         }));
+// // ✅ If more than one record, filter only Approved
+// console.log("labourDetails.legnth >1:", labourDetails.length);
+// if (labourDetails.length > 1) {
+//     labourDetails = labourDetails.filter(labour => labour.status === 'Approved');
+// }
 
-// // .query(`
-// //     WITH AttendanceCTE AS (
-// //         SELECT 
-// //             LabourId,
-// //             SUM(
-// //                 CASE 
-// //                     WHEN [Status] IN ('P', 'HD', 'H', 'MP', 'O') 
-// //                     THEN 1 
-// //                     ELSE 0
-// //                 END
-// //             ) AS AttendanceCount
-// //         FROM [dbo].[LabourAttendanceDetails]
-// //         WHERE 
-// //             MONTH([Date]) = @month
-// //             AND YEAR([Date]) = @year
-// //         GROUP BY LabourId
-// //     )
-// //     SELECT 
-// //         onboarding.id,
-// //         onboarding.LabourID AS LabourId,
-// //         onboarding.name,
-// //         onboarding.businessUnit,
-// //         onboarding.projectName,
-// //         onboarding.departmentName,
-// //         onboarding.department,
-// //         AttendanceCTE.AttendanceCount
-// //     FROM 
-// //         AttendanceCTE
-// //     INNER JOIN 
-// //         [labourOnboarding] AS onboarding
-// //     ON 
-// //         AttendanceCTE.LabourId = onboarding.LabourID
-// //     WHERE 
-// //         onboarding.status = 'Approved'
-// //         AND AttendanceCTE.AttendanceCount > 0
-// //     ORDER BY 
-// //         onboarding.LabourID;
-// // `);
+// // Remove 'status' if not needed in final response
+// // labourDetails = labourDetails.map(({ status, ...rest }) => rest);
 
-// // ------------------------------------------------------------------------------   END    ---------------------------------------------------------------------------------------------
-// // Map results to an array of labour details
-// const labourDetails = result.recordset.map(row => ({
-// id: row.id,
-// labourId: row.LabourId,
-// name: row.name,
-// businessUnit: row.businessUnit,
-// projectName: row.projectName,
-// departmentName: row.departmentName,
-// department: row.department,
-// attendanceCount: row.AttendanceCount
-// }));
-// return labourDetails;
-// // -----------------------------------------------------------    END     ----------------------------------------------------
+//         return labourDetails;
 
-//         // const labourIds = result.recordset.map(row => row.LabourId);
-//         // return labourIds;
 //     } catch (error) {
 //         console.error('Error in getEligibleLabours:', error);
 //         throw error;
 //     }
 // };
+
+
 function formatTotalOvertime(TotalOvertimeHours) {
     // console.log("inside Function:", TotalOvertimeHours);
 
@@ -2583,23 +2481,21 @@ async function calculateSalaryForLabour(labourId, month, year) {
             const hourlyWage = dailyWageRate / parsedWorkingHours;
 
             const totalHours = totalHoursForMonth - cappedOvertime;
+
+            console.log("totalPossibleHours  ",totalPossibleHours)
+            console.log("hourlyWage",hourlyWage)
+            console.log("totalHours",totalHours)
             
             if (presentDays === daysInSlice) {
                 baseWage = totalPossibleHours * hourlyWage;
-            } else if (totalPossibleHours < totalHours) {
-                baseWage = totalPossibleHours * hourlyWage;
-            } else {
-                if (presentDays < daysInSlice) {
+            }else if (presentDays < daysInSlice) {
                     const totalPossibleHours = presentDays * parsedWorkingHours;
                     if (totalPossibleHours < totalHours) {
                         baseWage = totalPossibleHours * hourlyWage;
                     }else{
                         baseWage = totalHours * hourlyWage;
                     }
-                } else {
-                    baseWage = totalHours * hourlyWage;
-                }
-            }
+                }            
 
         } else {
 

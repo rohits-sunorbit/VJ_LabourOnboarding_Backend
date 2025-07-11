@@ -1,7 +1,7 @@
 
 const express = require('express');
 const { getProjectNames, getLabourCategories, getDepartments, getWorkingHours, getDesignations, getCompanyNamesByProjectId, getDevices, getAttendanceLogs, approveLabour, getProjectDeviceStatus, updateProjectDeviceStatus, deleteProjectDeviceStatus, getProjectDeviceStatusSS, fetchDynamicData, fetchOrgDynamicData, addFvEmpId, updateEmployeeMaster, saveApiResponsePayload, getLaboursWithOldAttendance, fetchCachedLabours, saveTransferData, getAllLaboursWithTransferDetails, employeeMasterPayloadUpdatepost, organizationMasterPayloadUpdatepost, siteTransferRequestforAdmin, approveSiteTransfer, rejectSiteTransfer, editSiteTransfer, getAdminSiteTransferApproval, getWagesforInsentiveAdd
-    , getAdminCompanyTransferApproval, companyTransferRequestforAdmin, approveCompanyTransfer, rejectCompanyTransfer, editCompanyTransfer, getSuperAdminProjectNames
+    , getAdminCompanyTransferApproval, companyTransferRequestforAdmin, approveCompanyTransfer, rejectCompanyTransfer, editCompanyTransfer, getSuperAdminProjectNames, getLabourAttendanceCheck, addDevicesToProject, getDevicesByProject
 } = require('../controllers/dataController');
 const { addEmployee } = require("../controllers/sendLabourData")
 const router = express.Router();
@@ -49,6 +49,12 @@ router.put('/admin/editCompanyTransferadmin', editCompanyTransfer);
 
 
 router.get('/admin/getSuperAdminProjectNames', getSuperAdminProjectNames);
+router.get('/admin/attendance-check', getLabourAttendanceCheck);
+
+
+router.post('/admin/attendance-checkToProject', addDevicesToProject);
+router.get('/projectDeviceStatusgetDevicesByProject/:projectName', getDevicesByProject);
+
 
 module.exports = router;
 

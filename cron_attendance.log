@@ -349,3 +349,22 @@
 {"level":"info","message":"Scheduled cron triggered...","timestamp":"2025-04-16T06:17:00.727Z"}
 {"level":"info","message":"Running cron job for Attendance Date: 2025-04-15","timestamp":"2025-04-16T06:17:00.733Z"}
 {"level":"error","message":"Error running cron job for Date: 2025-04-15: parsedMonth is not defined","stack":"ReferenceError: parsedMonth is not defined\n    at runDailyAttendanceCron (C:\\Users\\Vaibhav Patil\\Desktop\\VJ_LabourApp_BackendNew\\backend\\controllers\\labourController.js:1749:90)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async Task._execution (C:\\Users\\Vaibhav Patil\\Desktop\\VJ_LabourApp_BackendNew\\backend\\controllers\\labourController.js:2976:5)","timestamp":"2025-04-16T06:17:01.717Z"}
+{"level":"info","message":"Scheduled cron triggered...","timestamp":"2025-05-20T06:40:00.048Z"}
+{"level":"info","message":"Running cron job for Attendance Date: 2025-05-19","timestamp":"2025-05-20T06:40:00.056Z"}
+{"level":"info","message":"Scheduled cron triggered...","timestamp":"2025-05-21T06:40:00.363Z"}
+{"level":"info","message":"Running cron job for Attendance Date: 2025-05-20","timestamp":"2025-05-21T06:40:00.374Z"}
+{"level":"error","message":"Error running cron job for Date: 2025-05-20: approvedLabours is not iterable","stack":"TypeError: approvedLabours is not iterable\n    at runDailyAttendanceCron (C:\\Users\\Vaibhav Patil\\Desktop\\VJ_LabourApp_BackendNew\\backend\\controllers\\labourController.js:2003:28)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async Task._execution (C:\\Users\\Vaibhav Patil\\Desktop\\VJ_LabourApp_BackendNew\\backend\\controllers\\labourController.js:3494:5)","timestamp":"2025-05-21T08:20:32.990Z"}
+{"level":"info","message":"Scheduled cron triggered...","timestamp":"2025-05-23T06:40:00.100Z"}
+{"level":"info","message":"Running cron job for Attendance Date: 2025-05-22","timestamp":"2025-05-23T06:40:00.112Z"}
+{"level":"info","message":"Scheduled cron triggered...","timestamp":"2025-06-05T06:40:00.863Z"}
+{"level":"info","message":"Running cron job for Attendance Date: 2025-06-04","timestamp":"2025-06-05T06:40:00.873Z"}
+{"level":"info","message":"Scheduled cron triggered...","timestamp":"2025-06-09T06:40:00.343Z"}
+{"level":"info","message":"Running cron job for Attendance Date: 2025-06-08","timestamp":"2025-06-09T06:40:00.361Z"}
+{"level":"error","message":"Error running cron job for Date: 2025-06-08: Error fetching attendance data","stack":"Error: Error fetching attendance data\n    at Object.getAttendanceByLabourId (C:\\Users\\Vaibhav Patil\\Desktop\\VJ_LabourApp_BackendNew\\backend\\models\\labourModel.js:1699:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async getAllLaboursAttendanceDaily (C:\\Users\\Vaibhav Patil\\Desktop\\VJ_LabourApp_BackendNew\\backend\\controllers\\labourController.js:2059:25)\n    at async runDailyAttendanceCron (C:\\Users\\Vaibhav Patil\\Desktop\\VJ_LabourApp_BackendNew\\backend\\controllers\\labourController.js:1998:33)\n    at async Task._execution (C:\\Users\\Vaibhav Patil\\Desktop\\VJ_LabourApp_BackendNew\\backend\\controllers\\labourController.js:3495:5)","timestamp":"2025-06-09T06:53:05.154Z"}
+{"level":"info","message":"Scheduled cron triggered...","timestamp":"2025-06-11T06:40:00.181Z"}
+{"level":"info","message":"Running cron job for Attendance Date: 2025-06-10","timestamp":"2025-06-11T06:40:00.198Z"}
+{"level":"error","message":"Error running cron job for Date: 2025-06-10: approvedLabours is not iterable","stack":"TypeError: approvedLabours is not iterable\n    at runDailyAttendanceCron (C:\\Users\\Vaibhav Patil\\Desktop\\VJ_LabourApp_BackendNew\\backend\\controllers\\labourController.js:2004:28)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async Task._execution (C:\\Users\\Vaibhav Patil\\Desktop\\VJ_LabourApp_BackendNew\\backend\\controllers\\labourController.js:3495:5)","timestamp":"2025-06-11T08:47:58.246Z"}
+{"level":"info","message":"Scheduled cron triggered...","timestamp":"2025-06-12T06:40:00.520Z"}
+{"level":"info","message":"Running cron job for Attendance Date: 2025-06-11","timestamp":"2025-06-12T06:40:00.535Z"}
+{"level":"info","message":"Scheduled cron triggered...","timestamp":"2025-06-12T06:50:00.307Z"}
+{"level":"info","message":"Running cron job for Attendance Date: 2025-06-11","timestamp":"2025-06-12T06:50:00.314Z"}

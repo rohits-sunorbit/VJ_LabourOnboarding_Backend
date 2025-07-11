@@ -934,7 +934,7 @@ async function getOvertimeMonthlyAPI(req, res) {
 async function getSalaryGenerationDataAPIAllLabours(req, res) {
     try {
         const { month, year, labourIds } = req.query;
-        // console.log('req.query for slarygeneration',req.query)
+        console.log('req.query for slarygeneration',req.query)
         if (!month || !year) {
             return res.status(400).json({ message: 'Month and year are required.' });
         }
@@ -1248,7 +1248,15 @@ const exportFixedWagesExcel = async (req, res) => {
 };
 
 
-
+async function getAllLabours(req, res) {
+    try {
+        const filters = req.query;
+        const labours = await labourModel.getAllLabours(filters);
+        res.json(labours);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
 
 module.exports = {
     getAllLabours,

@@ -21,7 +21,6 @@ async function checkAadhaarExists(aadhaarNumber) {
 // async function getNextUniqueID() {
 //     try {
 //         const pool = await poolPromise;
-
 //         // Fetch the maximum LabourID while excluding specific IDs
 //         let lastIDResult = await pool.request().query(`
 //             SELECT MAX(LabourID) AS lastID 
@@ -51,31 +50,24 @@ async function getNextUniqueID(departmentId) {
     try {
         const pool = await poolPromise;
 
+        const jihDepartments = [336, 337, 338, 339, 340, 341, 342];
         let prefix = 'JC';
         let initialID = 'JC4008';
         const exclusions = `'JCO519', 'VJ3893'`;
 
-        if (departmentId === 334) {
+        if (jihDepartments.includes(departmentId)) {
             prefix = 'JIH';
             initialID = 'JIH0001';
         }
 
-        let lastIDQuery = '';
+        const likeClause = prefix === 'JIH' ? "%JIH%" : "%JC%";
 
-        if (departmentId === 334) {
-            lastIDQuery = `
-                SELECT MAX(LabourID) AS lastID 
-                FROM labourOnboarding 
-                WHERE LabourID NOT IN (${exclusions}) 
-                AND departmentId = ${departmentId} and LabourID like '%JIH%'
-            `;
-        } else {
-            lastIDQuery = `
-                SELECT MAX(LabourID) AS lastID 
-                FROM labourOnboarding 
-                WHERE LabourID NOT IN (${exclusions}) and LabourID like '%JC%'
-            `;
-        }
+        const lastIDQuery = `
+            SELECT MAX(LabourID) AS lastID 
+            FROM labourOnboarding 
+            WHERE LabourID NOT IN (${exclusions}) 
+            AND LabourID LIKE '${likeClause}'
+        `;
 
         const result = await pool.request().query(lastIDQuery);
         const lastID = result.recordset[0].lastID;
@@ -92,6 +84,53 @@ async function getNextUniqueID(departmentId) {
         throw new Error(`Error fetching next unique ID: ${error.message}`);
     }
 }
+
+
+// async function getNextUniqueID(departmentId) {
+//     try {
+//         const pool = await poolPromise;
+
+//         let prefix = 'JC';
+//         let initialID = 'JC4008';
+//         const exclusions = `'JCO519', 'VJ3893'`;
+
+//         if (departmentId === 334) {
+//             prefix = 'JIH';
+//             initialID = 'JIH0001';
+//         }
+
+//         let lastIDQuery = '';
+
+//         if (departmentId === 334) {
+//             lastIDQuery = `
+//                 SELECT MAX(LabourID) AS lastID 
+//                 FROM labourOnboarding 
+//                 WHERE LabourID NOT IN (${exclusions}) 
+//                 AND departmentId = ${departmentId} and LabourID like '%JIH%'
+//             `;
+//         } else {
+//             lastIDQuery = `
+//                 SELECT MAX(LabourID) AS lastID 
+//                 FROM labourOnboarding 
+//                 WHERE LabourID NOT IN (${exclusions}) and LabourID like '%JC%'
+//             `;
+//         }
+
+//         const result = await pool.request().query(lastIDQuery);
+//         const lastID = result.recordset[0].lastID;
+
+//         if (!lastID) {
+//             return initialID;
+//         }
+
+//         const numericPart = parseInt(lastID.slice(prefix.length)) + 1;
+//         const nextID = `${prefix}${numericPart.toString().padStart(4, '0')}`;
+
+//         return nextID;
+//     } catch (error) {
+//         throw new Error(`Error fetching next unique ID: ${error.message}`);
+//     }
+// }
 
 
 async function registerData(labourData) {
@@ -135,7 +174,7 @@ async function registerData(labourData) {
             }
         });
 
-        //console.log('Inserting data into database for OnboardName:', labourData.OnboardName);
+        console.log('Inserting data into database for OnboardName:', labourData.OnboardName);
         const result = await request.query(`
       INSERT INTO labourOnboarding (
         LabourID, labourOwnership, uploadAadhaarFront, uploadAadhaarBack, uploadIdProof, name, aadhaarNumber,
@@ -150,7 +189,7 @@ async function registerData(labourData) {
         @labourCategory, @department, @workingHours, @contractorName, @contractorNumber, @designation,
         'Pending', 0, @title, @Marital_Status, @companyName, @Induction_Date, @Inducted_By, @uploadInductionDoc, @OnboardName,  @ValidTill, @location, @ConfirmDate, @retirementDate, @SalaryBu, @WorkingBu, @CreationDate, @businessUnit, @departmentId, @designationId, @labourCategoryId, @departmentName)
       `);
-        //console.log('Data successfully inserted for OnboardName:', labourData.OnboardName);
+        console.log('Data successfully inserted for OnboardName:', labourData.OnboardName);
         return result.recordset;
     } catch (error) {
         throw error;
@@ -674,13 +713,13 @@ async function registerDataUpdateDisable(labourData) {
           dateOfBirth, contactNumber, gender, dateOfJoining, Group_Join_Date, From_Date, Period, address, pincode, taluka, district, village,
           state, emergencyContact, photoSrc, bankName, branch, accountNumber, ifscCode, projectName, 
           labourCategory, department, workingHours, contractorName, contractorNumber, designation,
-          status, isApproved, title, Marital_Status, companyName, Induction_Date, Inducted_By, uploadInductionDoc, OnboardName, ValidTill, location, ConfirmDate, retirementDate, SalaryBu, WorkingBu, CreationDate, businessUnit, departmentId, designationId, labourCategoryId, departmentName, isResubmit) 
+          status, isApproved, title, Marital_Status, companyName, Induction_Date, Inducted_By, uploadInductionDoc, OnboardName, ValidTill, location, ConfirmDate, retirementDate, SalaryBu, WorkingBu, CreationDate, businessUnit, departmentId, designationId, labourCategoryId, departmentName, Reject_Reason) 
           VALUES (
           @LabourID, @labourOwnership, @uploadAadhaarFront, @uploadAadhaarBack, @uploadIdProof, @name, @aadhaarNumber,
           @dateOfBirth, @contactNumber, @gender, @dateOfJoining, @Group_Join_Date, @From_Date, @Period, @address, @pincode, @taluka, @district, @village,
           @state, @emergencyContact, @photoSrc, @bankName, @branch, @accountNumber, @ifscCode, @projectName,
           @labourCategory, @department, @workingHours, @contractorName, @contractorNumber, @designation,
-          'Pending', 0, @title, @Marital_Status, @companyName, @Induction_Date, @Inducted_By, @uploadInductionDoc, @OnboardName,  @ValidTill, @location, @ConfirmDate, @retirementDate, @SalaryBu, @WorkingBu, @CreationDate, @businessUnit, @departmentId, @designationId, @labourCategoryId, @departmentName, @isResubmit)
+          'Pending', 0, @title, @Marital_Status, @companyName, @Induction_Date, @Inducted_By, @uploadInductionDoc, @OnboardName,  @ValidTill, @location, @ConfirmDate, @retirementDate, @SalaryBu, @WorkingBu, @CreationDate, @businessUnit, @departmentId, @designationId, @labourCategoryId, @departmentName, @Reject_Reason)
         `);
         //console.log('Data successfully inserted for OnboardName Resubmmit button:', labourData.OnboardName);
         return result.recordset;
@@ -957,6 +996,54 @@ async function search(query) {
     } catch (error) {
         throw error;
     }
+}
+
+async function searchForAttendance(query) {
+    const pool       = await poolPromise;
+    const likeQuery  = `%${query}%`;
+
+    // --- 1️⃣ Primary hit on 'Approved'
+    let { recordset } = await pool.request()
+        .input('query',  sql.NVarChar, likeQuery)
+        .query(`
+            SELECT *
+            FROM   labourOnboarding
+            WHERE  status = 'Approved'
+              AND ( name           LIKE @query
+                 OR aadhaarNumber  LIKE @query
+                 OR LabourID       LIKE @query
+                 OR OnboardName    LIKE @query
+                 OR workingHours   LIKE @query
+                 OR businessUnit   LIKE @query
+                 OR designation    LIKE @query
+                 OR location       LIKE @query
+                 OR departmentName LIKE @query )
+        `);
+
+       if (recordset.length > 0) {
+        console.log(`[AttendanceSearch] Status cohort: Approved | rows: ${recordset.length}`);
+        return recordset;          // exit early on success
+    }
+
+    // --- 2️⃣ Fallback on 'Disable'
+    ({ recordset } = await pool.request()
+        .input('query', sql.NVarChar, likeQuery)
+        .query(`
+            SELECT *
+            FROM   labourOnboarding
+            WHERE  status = 'Disable'
+              AND ( name           LIKE @query
+                 OR aadhaarNumber  LIKE @query
+                 OR LabourID       LIKE @query
+                 OR OnboardName    LIKE @query
+                 OR workingHours   LIKE @query
+                 OR businessUnit   LIKE @query
+                 OR designation    LIKE @query
+                 OR location       LIKE @query
+                 OR departmentName LIKE @query )
+        `));
+ console.log(`[AttendanceSearch] Status cohort: Disable | rows: ${recordset.length}`);
+    return recordset;                             // may be [] if nothing disables either
 }
 
 async function getAllLabours() {
@@ -1607,6 +1694,42 @@ async function getAllApprovedLabours() {
 //         throw new Error('Error fetching approved or monthly disabled labours');
 //     }
 // }
+
+
+// async function getAllApprovedOrMonthlyDisabledLabours() {
+//     try {
+//         const pool = await poolPromise;
+
+//         // Define the LabourID array you want to filter by
+//         const labourIds = [
+//             'JC6057', 'JC5306'
+//         ];
+
+//         const result = await pool
+//             .request()
+//             .query(`
+//                     SELECT DISTINCT lo.LabourID AS labourId, lo.workingHours, lo.projectName, lo.status
+//                     FROM [labourOnboarding] lo
+//                     WHERE lo.status IN ('Approved', 'Disable')
+//                     AND lo.LabourID IN ('${labourIds.join("', '")}')
+                    
+//                     UNION
+
+//                     SELECT DISTINCT lo.LabourID AS labourId, lo.workingHours, lo.projectName, lo.status
+//                     FROM [labourOnboarding] lo
+//                     JOIN [LabourOnboardingForm].[dbo].[LabourAttendanceLogs] lal
+//                         ON lal.LabourID = lo.LabourID
+//                     WHERE lal.attendanceStatus = 'Disable'
+//                     AND lo.LabourID IN ('${labourIds.join("', '")}')
+//             `);
+// console.log("result.recordset for attendance ",result.recordset)
+//         return result.recordset;
+//     } catch (err) {
+//         console.error('SQL error fetching labours', err);
+//         throw new Error('Error fetching approved or monthly disabled labours');
+//     }
+// }
+
 
 async function getAllApprovedOrMonthlyDisabledLabours() {
     try {
@@ -2430,35 +2553,68 @@ async function fetchAttendanceSummary() {
     }
 };
 
+// async function fetchAttendanceDetailsByMonthYear(month, year) {
+//     try {
+//         const pool = await poolPromise;
+//         const result = await pool.request()
+//             .input('month', sql.Int, month)
+//             .input('year', sql.Int, year)
+//             .query(` SELECT 
+//     L.*,
+//     CASE 
+//       WHEN EXISTS (
+//          SELECT 1 
+//          FROM dbo.LabourAttendanceDetails d
+//          WHERE d.LabourId = L.LabourId
+//            AND MONTH(d.Date) = @month
+//            AND YEAR(d.Date) = @year
+//            AND d.ApprovalStatus = 'Pending'
+//       ) THEN CAST(1 AS BIT)
+//       ELSE CAST(0 AS BIT)
+//     END AS InApprovalStatus
+// FROM dbo.LabourAttendanceSummary AS L
+// WHERE 
+//     MONTH(TRY_CONVERT(DATE, L.SelectedMonth + '-01')) = @month 
+//     AND YEAR(TRY_CONVERT(DATE, L.SelectedMonth + '-01')) = @year; `);
+//         return result.recordset;
+//     } catch (error) {
+//         console.error('Error fetching attendance details for all labours:', error);
+//         throw error;
+//     }
+// };
+
 async function fetchAttendanceDetailsByMonthYear(month, year) {
     try {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('month', sql.Int, month)
             .input('year', sql.Int, year)
-            .query(` SELECT 
-    L.*,
-    CASE 
-      WHEN EXISTS (
-         SELECT 1 
-         FROM dbo.LabourAttendanceDetails d
-         WHERE d.LabourId = L.LabourId
-           AND MONTH(d.Date) = @month
-           AND YEAR(d.Date) = @year
-           AND d.ApprovalStatus = 'Pending'
-      ) THEN CAST(1 AS BIT)
-      ELSE CAST(0 AS BIT)
-    END AS InApprovalStatus
-FROM dbo.LabourAttendanceSummary AS L
-WHERE 
-    MONTH(TRY_CONVERT(DATE, L.SelectedMonth + '-01')) = @month 
-    AND YEAR(TRY_CONVERT(DATE, L.SelectedMonth + '-01')) = @year; `);
+            .query(`
+                SELECT 
+                    L.*,
+                    CASE 
+                        WHEN EXISTS (
+                            SELECT 1 
+                            FROM dbo.LabourAttendanceDetails d
+                            WHERE d.LabourId = L.LabourId
+                            AND MONTH(d.Date) = @month
+                            AND YEAR(d.Date) = @year
+                            AND d.ApprovalStatus = 'Pending'
+                        ) THEN CAST(1 AS BIT)
+                        ELSE CAST(0 AS BIT)
+                    END AS InApprovalStatus
+                FROM dbo.LabourAttendanceSummary AS L
+                WHERE 
+                    MONTH(TRY_CONVERT(DATE, L.SelectedMonth + '-01')) = @month 
+                    AND YEAR(TRY_CONVERT(DATE, L.SelectedMonth + '-01')) = @year
+                    AND L.PresentDays > 0;  -- Add condition to exclude labors with PresentDays = 0
+            `);
         return result.recordset;
     } catch (error) {
         console.error('Error fetching attendance details for all labours:', error);
         throw error;
     }
-};
+}
 
 
 async function fetchAttendanceDetailsByMonthYearForSingleLabour(labourId, month, year) {
@@ -3477,7 +3633,8 @@ console.log("updasertAttendnace",labourId,date,firstPunchManually,lastPunchManua
 
             rawOvertime = adjustedOvertime;
             payrollCalRoundOffOvertime = roundOvertime(rawOvertime);
-            finalOvertimeManually = payrollCalRoundOffOvertime;
+            finalOvertimeManually = Math.min(payrollCalRoundOffOvertime, 4);
+            // finalOvertimeManually = payrollCalRoundOffOvertime;
         }
 
 
@@ -4063,6 +4220,7 @@ async function getAttendanceByDateRange(projectNameStr, startDate, endDate, depa
             lad.Date, 
             lad.ProjectName, 
             lo.BusinessUnit,
+            lo.name,
             lo.departmentName,
             lad.Status,
             lad.FirstPunchManually, 
@@ -5747,31 +5905,38 @@ async function searchFromVariableInput(query) {
 
 
 
-
-
-
 async function searchAttendance(query) {
-    try {
+   try {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('query', sql.NVarChar, `%${query}%`)
             .query(`
-                SELECT lo.id, lo.aadhaarNumber, lo.name, lo.projectName AS ProjectID, 
-                       lo.labourCategory, lo.department AS DepartmentID, lo.LabourID, 
-                       lo.companyName, lo.OnboardName, lo.workingHours, lo.businessUnit, 
-                       lo.designation, lo.location As projectName, lo.departmentName As department,
-                       fs.netPay, fs.basicSalary
-                FROM labourOnboarding lo
-                LEFT JOIN FinalizedSalaryPay fs ON lo.LabourID = fs.LabourID
-                WHERE lo.status IN ('Approved', 'Disable')
-                  AND (lo.name LIKE @query 
-                       OR lo.aadhaarNumber LIKE @query 
-                       OR lo.LabourID LIKE @query 
-                       OR lo.OnboardName LIKE @query 
-                       OR lo.workingHours LIKE @query 
-                       OR lo.businessUnit LIKE @query 
-                       OR lo.designation LIKE @query 
-                       OR lo.location LIKE @query)
+                WITH RankedLabours AS (
+                    SELECT *,
+                        COUNT(*) OVER (PARTITION BY LabourID) AS LabourCount,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY LabourID 
+                            ORDER BY 
+                                CASE 
+                                    WHEN status = 'Approved' THEN 1 
+                                    ELSE 2 
+                                END
+                        ) AS rn
+                    FROM labourOnboarding
+                    WHERE 
+                        name LIKE @query OR 
+                        aadhaarNumber LIKE @query OR 
+                        LabourID LIKE @query OR 
+                        OnboardName LIKE @query OR 
+                        workingHours LIKE @query OR 
+                        businessUnit LIKE @query OR 
+                        designation LIKE @query OR 
+                        location LIKE @query OR 
+                        departmentName LIKE @query
+                )
+                SELECT * 
+                FROM RankedLabours
+                WHERE rn = 1
             `);
         return result.recordset;
     } catch (error) {
@@ -5780,6 +5945,58 @@ async function searchAttendance(query) {
 };
 
 
+// async function searchAttendance(query) {
+//     try {
+//         const pool = await poolPromise;
+//         const result = await pool.request()
+//             .input('query', sql.NVarChar, `%${query}%`)
+//             .query(`
+//                 SELECT lo.id, lo.aadhaarNumber, lo.name, lo.projectName AS ProjectID, 
+//                        lo.labourCategory, lo.department AS DepartmentID, lo.LabourID, 
+//                        lo.companyName, lo.OnboardName, lo.workingHours, lo.businessUnit, 
+//                        lo.designation, lo.location As projectName, lo.departmentName As department,
+//                        fs.netPay, fs.basicSalary
+//                 FROM labourOnboarding lo
+//                 LEFT JOIN FinalizedSalaryPay fs ON lo.LabourID = fs.LabourID
+//                 WHERE lo.status IN ('Approved', 'Disable')
+//                   AND (lo.name LIKE @query 
+//                        OR lo.aadhaarNumber LIKE @query 
+//                        OR lo.LabourID LIKE @query 
+//                        OR lo.OnboardName LIKE @query 
+//                        OR lo.workingHours LIKE @query 
+//                        OR lo.businessUnit LIKE @query 
+//                        OR lo.designation LIKE @query 
+//                        OR lo.location LIKE @query)
+//             `);
+//         return result.recordset;
+//     } catch (error) {
+//         throw error;
+//     }
+// };
+
+
+
+// async function searchLaboursFromSiteTransfer(query) {
+//     try {
+//         const pool = await poolPromise;
+//         const result = await pool.request()
+//             .input('query', sql.NVarChar, `%${query}%`)
+//             .query(`
+//                 SELECT id, aadhaarNumber, name, projectName, labourCategory, department as departmentId,
+//                        LabourID, companyName, OnboardName, workingHours, businessUnit, designation, location
+//                 FROM labourOnboarding
+//                 WHERE status IN ('Approved', 'Disable')
+//                   AND (name LIKE @query 
+//                        OR companyName LIKE @query 
+//                        OR LabourID LIKE @query 
+//                        OR departmentName LIKE @query 
+//                        OR location LIKE @query)
+//             `);
+//         return result.recordset;
+//     } catch (error) {
+//         throw error;
+//     }
+// };
 
 async function searchLaboursFromSiteTransfer(query) {
     try {
@@ -5787,21 +6004,29 @@ async function searchLaboursFromSiteTransfer(query) {
         const result = await pool.request()
             .input('query', sql.NVarChar, `%${query}%`)
             .query(`
-                SELECT id, aadhaarNumber, name, projectName, labourCategory, department as departmentId,
-                       LabourID, companyName, OnboardName, workingHours, businessUnit, designation, location
-                FROM labourOnboarding
-                WHERE status IN ('Approved', 'Disable')
-                  AND (name LIKE @query 
-                       OR companyName LIKE @query 
-                       OR LabourID LIKE @query 
-                       OR departmentName LIKE @query 
-                       OR location LIKE @query)
+                WITH LabourFiltered AS (
+                    SELECT id, aadhaarNumber, name, projectName, labourCategory, department as departmentId,
+                           LabourID, companyName, OnboardName, workingHours, businessUnit, designation, location,
+                           ROW_NUMBER() OVER (PARTITION BY LabourID ORDER BY CASE WHEN status = 'Approved' THEN 1 ELSE 2 END) AS row_num
+                    FROM labourOnboarding
+                    WHERE status IN ('Approved', 'Disable')
+                    AND (name LIKE @query 
+                         OR companyName LIKE @query 
+                         OR LabourID LIKE @query 
+                         OR departmentName LIKE @query 
+                         OR location LIKE @query)
+                )
+                SELECT id, aadhaarNumber, name, projectName, labourCategory, departmentId, LabourID, companyName, 
+                       OnboardName, workingHours, businessUnit, designation, location
+                FROM LabourFiltered
+                WHERE row_num = 1;
             `);
         return result.recordset;
     } catch (error) {
         throw error;
     }
-};
+}
+
 
 // .query('SELECT * FROM LabourMonthlyWages WHERE name LIKE @query OR companyName LIKE @query OR LabourID LIKE @query OR DailyWages LIKE @query OR departmentName LIKE @query OR WagesEditedBy LIKE @query OR PayStructure LIKE @query');
 
@@ -5926,6 +6151,7 @@ module.exports = {
     getVariablePayAndLabourOnboardingJoin,
     getHolidayDates,
     searchAttendance,
+    searchForAttendance,
     searchLaboursFromSiteTransfer,
     updateTotalOvertimeHours,
     searchFromVariableInput,

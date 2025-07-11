@@ -181,6 +181,7 @@ const dataRoutes = require('./routes/dataRoutes');
 const { poolPromise2 } = require('./config/dbConfig2');
 const { poolPromise } = require('./config/dbConfig');
 const insentiveRoutes = require('./routes/insentiveRoutes');
+const dashBoardRoutes = require('./routes/dashBoardRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -302,6 +303,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/users', userRoutes);
 app.use('/api',(req, res, next)=>{console.log('/api'); next()}, dataRoutes);
 app.use('/insentive', insentiveRoutes);
+app.use('/dashboard', dashBoardRoutes);
 app.use(EmployeeRoute);
 
 app.listen(PORT, () => {

@@ -1,0 +1,62 @@
+[2025-07-24 11:20:20] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 11:21:46] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 11:21:50] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:00:04] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:00:28] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:01:08] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:01:14] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:01:17] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:04:32] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:04:42] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:04:49] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:04:51] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:04:57] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:05:11] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:05:47] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:05:55] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:06:06] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:06:08] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:06:32] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:06:49] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:07:09] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:07:23] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:07:36] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 12:14:07] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 14:46:31] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 14:46:34] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 15:03:43] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 15:03:48] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 15:04:06] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 15:04:13] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 15:04:17] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 15:04:18] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 15:04:24] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 15:04:33] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 15:04:44] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 15:07:55] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 15:08:04] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 15:11:55] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 15:12:05] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 15:12:07] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 16:07:45] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 16:07:49] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 16:12:05] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 16:12:16] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 16:22:02] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 16:22:16] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 16:43:02] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 16:58:23] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 16:58:58] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 16:59:01] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 17:10:00] [INFO] ⏰ Running all shift jobs sequentially...
+[2025-07-24 17:10:00] [INFO] Shift 1 (08:00 AM) - Job Started
+[2025-07-24 17:19:07] [INFO] Shift 1 (08:00 AM) - Success: {"success":true,"message":"Comparison successful","totalNullFirstPunch":4312,"totalValidPunchTime":165,"matchedCount":165,"matchedLabourIds":["JC5752","JC5877","JC4693","JC5407","JIH0068","JIH0031","JIH0342","JC6204","JC4178","JC5304","JC5573","JIH0188","JC6299","JC5356","JC5855","JIH0194","JC5371","JIH0157","JIH0191","JC6101","JC5406","JC4564","JC1108","JIH0182","JC1171","JC6139","JC5472","JC6133","JC5730","JC5888","JIH0201","JC4867","JIH0019","JIH0260","JC6223","JIH0067","JC5548","JC6205","JC5851","JC5811","JIH0247","JC6175","JC4925","JC5621","JC5773","JC4037","JC4910","JC5440","JC5423","JC5838","JC5897","JC6213","JIH0021","JC6006","JIH0360","JC4983","JC5335","JIH0174","JC5726","JC5947","JIH0405","JC5439","JC5879","JC4704","JC5515","JC6113","JC5969","JIH0051","JC5697","JC5719","JC5635","JC5463","JC4118","JC4762","JC5273","JC6012","JC4672","JC5276","JC5492","JIH0027","JIH0117","JC5431","JC4311","JC5704","JC2637","JIH0411","JC6143","JIH0192","JC5438","JIH0383","JC5217","JC5678","JC6094","JC4074","JC5710","JIH0156","JC6158","JC5802","JIH0292","JC4989","JC4265","JC5383","JIH0268","JC5600","JC5543","JC5814","JC5892","JC5885","JC5545","JC6061","JC3034","JC5279","JC5852","JIH0409","JIH0429","JC2679","JIH0180","JC5876","JIH0116","JC5982","JIH0261","JC5129","JC4491","JC5127","JC5113","JC5506","JC0630","JC6091","JC6159","JC6176","JIH0164","JC5634","JIH0176","JIH0288","JC5011","JIH0305","JC6180","JC4419","JIH0226","JIH0272","JC6181","JC5513","JIH0304","JC0021","JC6201","JC5514","JC5706","JC5058","JC6174","JC5181","JIH0275","JC4807","JC5715","JC5694","JIH0029","JC4639","JC5707","JC6050","JC5397","JC5255","JC4558","JIH0385","JIH0045","JC5540","JC5933"]}
+[2025-07-24 17:19:07] [INFO] Shift 2 (11:00 AM) - Job Started
+[2025-07-24 17:28:51] [INFO] Shift 2 (11:00 AM) - Success: {"success":true,"message":"Comparison successful","totalNullFirstPunch":4312,"totalValidPunchTime":165,"matchedCount":165,"matchedLabourIds":["JC5855","JC5356","JIH0194","JC5371","JIH0157","JIH0191","JC6101","JC5406","JC4564","JC5752","JC5877","JC4693","JC5407","JIH0068","JIH0031","JIH0342","JC6204","JC4178","JC5304","JC5573","JIH0188","JC6299","JIH0292","JC4989","JC4265","JC5383","JIH0268","JC5600","JC5543","JC5814","JC5892","JC5885","JC5545","JC5704","JC2637","JIH0411","JC6143","JIH0192","JC5438","JIH0383","JC5217","JC6094","JC5678","JC4074","JC5710","JIH0156","JC5802","JC6158","JC6175","JC4925","JC5621","JC5773","JC5440","JC4910","JC4037","JC5423","JC5838","JC5897","JC6213","JIH0021","JC6006","JIH0360","JC4983","JC5335","JIH0174","JC1108","JIH0182","JC1171","JC6139","JC5472","JC6133","JC5730","JC5888","JC4867","JIH0201","JIH0019","JIH0260","JC6223","JIH0067","JC5548","JC6205","JC5851","JC5811","JIH0247","JC5506","JC0630","JC6091","JC6159","JC6176","JIH0429","JC2679","JIH0180","JC5876","JIH0116","JC5982","JIH0261","JC5129","JC4491","JC5127","JC5113","JC4672","JC5276","JC5492","JIH0027","JIH0117","JC5431","JC4311","JC5726","JC5947","JIH0405","JC5439","JC5879","JC4704","JC5515","JC6113","JIH0051","JC5969","JC5697","JC5719","JC5635","JC5463","JC6201","JC5514","JC5706","JC5058","JC6174","JC5181","JIH0275","JC4807","JC5715","JC5694","JIH0029","JC4639","JC5707","JC5397","JC6050","JC5255","JC4118","JC4762","JC6012","JC5273","JIH0164","JC5634","JIH0176","JIH0288","JC5011","JIH0305","JC6180","JC4419","JIH0226","JIH0272","JC6181","JC5513","JIH0304","JC0021","JC4558","JIH0385","JIH0045","JC5540","JC5933","JC6061","JC3034","JC5279","JC5852","JIH0409"]}
+[2025-07-24 17:28:51] [INFO] Shift 3 (02:00 PM) - Job Started
+[2025-07-24 17:32:32] [INFO] Shift 3 (02:00 PM) - Success: {"success":false,"message":"Error comparing labour punch data","error":"Transaction (Process ID 56) was deadlocked on lock | communication buffer resources with another process and has been chosen as the deadlock victim. Rerun the transaction."}
+[2025-07-24 17:32:32] [INFO] ✅ All shift jobs completed sequentially.
+[2025-07-24 18:07:21] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 18:07:26] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 18:07:27] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-24 18:07:30] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully

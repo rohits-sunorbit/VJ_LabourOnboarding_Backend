@@ -5,7 +5,7 @@ const config = {
   user: 'sa',
   password: 'farvision@123',
   server: '157.20.51.205',
-  database: 'LabourOnboardingForm_TEST',
+  database: 'LabourOnboardingForm',
 
 
   // user:process.env.DB_USER_1,

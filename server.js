@@ -2,7 +2,7 @@
 
 
 //     // This code change on 19-07-2024 with the essl send data
-    
+
 
 //     require('dotenv').config();
 // const express = require('express');
@@ -163,6 +163,8 @@
 
 
 require('dotenv').config();
+
+const http = require('http');
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -182,6 +184,8 @@ const { poolPromise2 } = require('./config/dbConfig2');
 const { poolPromise } = require('./config/dbConfig');
 const insentiveRoutes = require('./routes/insentiveRoutes');
 const dashBoardRoutes = require('./routes/dashBoardRoutes');
+
+require('./sheduler/attandanceShedular'); // Import the scheduler to start it
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -301,10 +305,17 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
 app.use('/users', userRoutes);
-app.use('/api',(req, res, next)=>{console.log('/api'); next()}, dataRoutes);
+app.use('/api', (req, res, next) => { console.log('/api'); next() }, dataRoutes);
 app.use('/insentive', insentiveRoutes);
 app.use('/dashboard', dashBoardRoutes);
 app.use(EmployeeRoute);
+
+const server = http.createServer(app);
+
+/*  >>> THE THREE LINES THAT FIX THE 502 <<<  */
+server.headersTimeout = 0;    // how long Node waits for *response headers*
+server.requestTimeout = 0;    // how long Node waits for the *whole response*
+server.timeout        = 0;    // legacy fallback for Node ≤16
 
 app.listen(PORT, () => {
     console.log(`App is running on PORT ${PORT}`);
@@ -319,5 +330,5 @@ poolPromise2
     });
 
 module.exports = {
-    upload, 
+    upload,
 };

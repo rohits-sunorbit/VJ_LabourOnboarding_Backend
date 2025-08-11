@@ -1,0 +1,15 @@
+[2025-07-25 10:47:07] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-25 11:35:47] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-25 11:35:52] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-25 11:35:55] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-25 11:40:27] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-25 11:40:30] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-25 11:40:35] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-25 17:10:00] [INFO] ⏰ Running all shift jobs sequentially...
+[2025-07-25 17:10:00] [INFO] Shift 1 (08:00 AM) - Job Started
+[2025-07-25 17:14:15] [INFO] Shift 1 (08:00 AM) - Success: {"success":false,"message":"Error comparing labour punch data","error":"Transaction (Process ID 63) was deadlocked on lock | communication buffer resources with another process and has been chosen as the deadlock victim. Rerun the transaction."}
+[2025-07-25 17:14:15] [INFO] Shift 2 (11:00 AM) - Job Started
+[2025-07-25 17:15:07] [INFO] Shift 2 (11:00 AM) - Success: {"success":false,"message":"Error comparing labour punch data","error":"Transaction (Process ID 63) was deadlocked on lock | communication buffer resources with another process and has been chosen as the deadlock victim. Rerun the transaction."}
+[2025-07-25 17:15:07] [INFO] Shift 3 (02:00 PM) - Job Started
+[2025-07-25 17:16:40] [INFO] Shift 3 (02:00 PM) - Success: {"success":false,"message":"Error comparing labour punch data","error":"Transaction (Process ID 63) was deadlocked on lock | communication buffer resources with another process and has been chosen as the deadlock victim. Rerun the transaction."}
+[2025-07-25 17:16:40] [INFO] ✅ All shift jobs completed sequentially.

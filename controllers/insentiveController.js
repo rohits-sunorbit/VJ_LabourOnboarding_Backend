@@ -15,6 +15,8 @@ const { isHoliday } = require('../models/labourModel');
 const xlsx = require('xlsx');
 
 
+
+
 async function getAllLabours(req, res) {
     try {
         const filters = req.query;
@@ -256,7 +258,7 @@ const getVariablePayAndLabourOnboardingJoincontroller = async (req, res) => {
 const upsertLabourVariablePay = async (req, res) => {
     try {
         const payload = req.body;
-
+console.log("payload variable Pay", payload)
         if (!payload.LabourID || !payload.payStructure) {
             return res.status(400).json({ message: 'Labour ID and Pay Structure are required' });
         }
@@ -931,46 +933,187 @@ async function getOvertimeMonthlyAPI(req, res) {
  * Fetch salary generation data for all eligible labours
  */
 
+
+/**
+ * Fetch salary generation data for all eligible labours
+ */
+
+const CONCURRENCY = 3;  // adjust to SQL capacity
+const MAX_RETRIES = 3;
+
+/* ─────────────────────────────────────────────────────────────── */
+/*  GET /insentive/payroll/salaryGenerationDataAllLabours          */
+/* ─────────────────────────────────────────────────────────────── */
 async function getSalaryGenerationDataAPIAllLabours(req, res) {
-    try {
-        const { month, year, labourIds } = req.query;
-        console.log('req.query for slarygeneration',req.query)
-        if (!month || !year) {
-            return res.status(400).json({ message: 'Month and year are required.' });
-        }
+  try {
+    const pLimit = (await import('p-limit')).default;
+    /* ---------- validation ---------- */
+    const month = +req.query.month;
+    const year  = +req.query.year;
+    const projectIds = req.query.projectId
+  ? req.query.projectId.split(',').map(id => parseInt(id.trim()))
+  : undefined;
 
-        const idsArray = labourIds ? labourIds.split(',').map(id => id.trim()) : undefined;
-        // Fetch eligible labours
-        const eligibleLabours = await labourModel.getEligibleLabours(parseInt(month), parseInt(year), idsArray);
+    if (!month || !year)
+      return res.status(400).json({ message: 'Month and year are required.' });
 
-        const salaryData = await Promise.all(
-            eligibleLabours.map(async (labour) => {
-                const labourId = labour.labourId;
+    const idsArray = req.query.labourIds
+      ? req.query.labourIds.split(',').map((id) => id.trim())
+      : undefined;
 
-                // Calculate full salary details using calculateSalaryForLabour function
-                const salaryDetails = await labourModel.calculateSalaryForLabour(labourId, parseInt(month), parseInt(year)) || {};
-                if (!salaryDetails || salaryDetails.message) {
-                    return null;
-                }
-                return {
-                    ...labour,
-                    month: parseInt(month),
-                    year: parseInt(year),
-                    ...salaryDetails,
+    /* ---------- data to process ---------- */
+    const eligible = await labourModel.getEligibleLabours(month, year, projectIds, idsArray);
+    if (!eligible.length) return res.json([]); // nothing to do
 
-                };
-            })
-        );
+    /* ---------- split into TWO roughly equal chunks ---------- */
+    const mid  = Math.ceil(eligible.length / 3);
+    const jobs = [eligible.slice(0, mid), eligible.slice(mid)];
 
-        // Remove null values (labours without approved wages)
-        const filteredSalaryData = salaryData.filter((labour) => labour !== null);
+    /* keep the HTTP socket alive for a long job */
+    res.setTimeout(0);
 
-        return res.status(200).json(filteredSalaryData);
-    } catch (error) {
-        console.error('Error fetching salary generation data:', error);
-        return res.status(500).json({ message: 'Error fetching salary generation data.', error: error.message });
+    /* ---------- run both phases serially ---------- */
+    const combinedRows = [];
+    for (let phase = 0; phase < jobs.length; phase++) {
+      const chunk   = jobs[phase];
+      const limiter = pLimit(CONCURRENCY);
+
+      /* process this chunk with controlled parallelism */
+      const rows = await Promise.all(
+        chunk.map((lab) =>
+          limiter(() => _withRetry(lab, month, year)),
+        ),
+      );
+
+      combinedRows.push(...rows.filter(Boolean)); // drop nulls
+      console.log(`Phase ${phase + 1}/${jobs.length} done → ${combinedRows.length} rows`);
     }
-};
+
+    return res.json(combinedRows);
+  } catch (err) {
+    console.error('Error fetching salary generation data:', err);
+    res.status(500).json({
+      message: 'Error fetching salary generation data.',
+      error  : err.message,
+    });
+  }
+}
+
+/* ───── helper: per-labour retry wrapper ───── */
+async function _withRetry(labour, month, year) {
+  const { labourId } = labour;
+
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const result = await labourModel.calculateSalaryForLabour(labourId, month, year);
+      if (result && !result.message) {
+        return { ...labour, month, year, ...result };
+      }
+      console.warn(`Attempt ${attempt}: no data for labour ${labourId}`);
+    } catch (err) {
+      console.error(`Attempt ${attempt} failed for ${labourId}:`, err.message);
+    }
+  }
+  console.warn(`Giving up on labour ${labourId}`);
+  return null;
+}
+
+
+/**
+ * Fetch salary generation data for all eligible labours
+ */
+// const CONCURRENCY   = 5;  // tweak to match SQL-Server capacity
+// const MAX_RETRIES   = 2;
+
+// async function getSalaryGenerationDataAPIAllLabours(req, res) {
+//  try {
+//     const { month, year, labourIds } = req.query;
+//           const pLimit = (await import('p-limit')).default;
+
+//     // ────────────────────────── validation ──────────────────────────
+//     if (!month || !year) {
+//       return res.status(400).json({ message: 'Month and year are required.' });
+//     }
+//     const monthNum = Number(month);
+//     const yearNum  = Number(year);
+//     if (Number.isNaN(monthNum) || Number.isNaN(yearNum)) {
+//       return res.status(400).json({ message: 'Month and year must be numbers.' });
+//     }
+
+//     // ────────────────────────── inputs ──────────────────────────────
+//     const idsArray =
+//       labourIds && labourIds.length
+//         ? labourIds.split(',').map((id) => id.trim())
+//         : undefined;
+
+//     const eligibleLabours = await labourModel.getEligibleLabours(
+//       monthNum,
+//       yearNum,
+//       idsArray
+//     );
+
+//     // ────────────────────────── controlled parallelism ──────────────
+//     const limiter = pLimit(CONCURRENCY);
+
+//     const rows = await Promise.all(
+//       eligibleLabours.map((labour) =>
+//         limiter(async () => {
+//           const { labourId } = labour;
+
+//           let salaryDetails = null;
+
+//           for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+//             try {
+//               const result = await labourModel.calculateSalaryForLabour(
+//                 labourId,
+//                 monthNum,
+//                 yearNum
+//               );
+
+//               // handle “no data” sentinel (your model returns { message } on miss)
+//               if (result && !result.message) {
+//                 salaryDetails = result;
+//                 break; // success!
+//               }
+//               console.warn(
+//                 `Attempt ${attempt} → no data for labour ${labourId}.`
+//               );
+//             } catch (err) {
+//               console.error(
+//                 `Attempt ${attempt} errored for labour ${labourId}:`,
+//                 err.message
+//               );
+//             }
+//           }
+
+//           if (!salaryDetails) {
+//             console.warn(
+//               `Giving up on labour ${labourId} after ${MAX_RETRIES} attempts.`
+//             );
+//             return null; // filtered out later
+//           }
+
+//           return {
+//             ...labour,
+//             month: monthNum,
+//             year : yearNum,
+//             ...salaryDetails,
+//           };
+//         })
+//       )
+//     );
+
+//     const successfulRows = rows.filter(Boolean); // drop nulls
+//     return res.status(200).json(successfulRows);
+//   } catch (error) {
+//     console.error('Error fetching salary generation data:', error);
+//     return res
+//       .status(500)
+//       .json({ message: 'Error fetching salary generation data.', error: error.message });
+//   }
+// };
+
+
 
 
 async function saveFinalizePayrollData(req, res) {
@@ -1258,6 +1401,143 @@ async function getAllLabours(req, res) {
     }
 }
 
+
+const getMatchedLabourIdsWithValidPunch = async () => {
+  try {
+    const pool1 = await poolPromise;
+    const pool2 = await poolPromise3;
+
+    // Step 1: Get LabourIds with NULL FirstPunch in last 10 days
+    const result1 = await pool1.request().query(`
+      SELECT DISTINCT LabourId
+      FROM [LabourOnboardingForm].[dbo].[LabourAttendanceDetails]
+      WHERE FirstPunch IS NULL
+        AND [Date] BETWEEN DATEADD(DAY, -17, CAST(GETDATE() AS DATE)) 
+                        AND DATEADD(DAY, -3, CAST(GETDATE() AS DATE))
+    `);
+
+    const nullFirstPunchIds = result1.recordset.map(row => row.LabourId);
+    if (nullFirstPunchIds.length === 0) return [];
+
+    // Step 2: Check which of these have logs in current month in LabourAttendanceLogs
+    const matchedIdString = nullFirstPunchIds.map(id => `'${id}'`).join(',');
+    const result2 = await pool1.request().query(`
+      SELECT DISTINCT LabourId
+      FROM [LabourOnboardingForm].[dbo].[LabourAttendanceLogs]
+      WHERE LabourId IN (${matchedIdString})
+        AND MONTH(CreatedAt) = MONTH(GETDATE())
+        AND YEAR(CreatedAt) = YEAR(GETDATE())
+    `);
+
+    const labourIdsWithLogs = result2.recordset.map(row => row.LabourId);
+    if (labourIdsWithLogs.length === 0) return [];
+
+    // Step 3: Check which of these LabourIds have valid punch in Attendance table
+    const labourIdsWithLogsString = labourIdsWithLogs.map(id => `'${id}'`).join(',');
+    const result3 = await pool2.request().query(`
+      SELECT DISTINCT user_id
+      FROM [etimetracklite11.8].[dbo].[Attendance]
+      WHERE punch_time IS NOT NULL
+        AND punch_date BETWEEN DATEADD(DAY, -17, CAST(GETDATE() AS DATE)) 
+                           AND DATEADD(DAY, -3, CAST(GETDATE() AS DATE))
+        AND user_id IN (${labourIdsWithLogsString})
+        AND (
+          user_id LIKE 'JC%' 
+          OR user_id LIKE 'JIH%'
+        );
+    `);
+
+    const finalMatchedIds = result3.recordset.map(row => row.user_id);
+
+    console.log("Final Matched IDs (FirstPunch NULL + Logs This Month + Valid Punch):", finalMatchedIds);
+    return finalMatchedIds;
+
+  } catch (err) {
+    console.error("Error in getMatchedLabourIdsWithValidPunch:", err);
+    throw err;
+  }
+};
+
+
+// const getMatchedLabourIdsWithValidPunch = async () => {
+//   try {
+//     const pool1 = await poolPromise;
+//     const pool2 = await poolPromise3;
+
+//     // Step 1: Get LabourId + Date where FirstPunch IS NULL
+//     const result1 = await pool1.request().query(`
+//       SELECT LabourId, CONVERT(VARCHAR, [Date], 23) AS PunchDate
+//       FROM [LabourOnboardingForm].[dbo].[LabourAttendanceDetails]
+//       WHERE FirstPunch IS NULL
+//         AND [Date] BETWEEN DATEADD(DAY, -30, CAST(GETDATE() AS DATE)) 
+//                         AND DATEADD(DAY, -2, CAST(GETDATE() AS DATE))
+//     `);
+
+//     const nullFirstPunchRows = result1.recordset;
+//     if (nullFirstPunchRows.length === 0) return [];
+
+//     const nullFirstPunchIds = [...new Set(nullFirstPunchRows.map(row => row.LabourId))];
+
+//     // Step 2: Filter LabourIds with logs in current month in LabourAttendanceLogs
+//     const matchedIdString = nullFirstPunchIds.map(id => `'${id}'`).join(',');
+//     const result2 = await pool1.request().query(`
+//       SELECT DISTINCT LabourId
+//       FROM [LabourOnboardingForm].[dbo].[LabourAttendanceLogs]
+//       WHERE LabourId IN (${matchedIdString})
+//         AND MONTH(CreatedAt) = MONTH(GETDATE())
+//         AND YEAR(CreatedAt) = YEAR(GETDATE())
+//     `);
+
+//     const labourIdsWithLogs = result2.recordset.map(row => row.LabourId);
+//     if (labourIdsWithLogs.length === 0) return [];
+
+//     // Filter nullFirstPunchRows to include only those with logs this month
+//     const filteredNullPunchRows = nullFirstPunchRows.filter(row =>
+//       labourIdsWithLogs.includes(row.LabourId)
+//     );
+//     if (filteredNullPunchRows.length === 0) return [];
+
+//     // Step 3: Get valid punches from Attendance
+//     const result3 = await pool2.request().query(`
+//       SELECT user_id, CONVERT(VARCHAR, punch_date, 23) AS PunchDate
+//       FROM [etimetracklite11.8].[dbo].[Attendance]
+//       WHERE punch_time IS NOT NULL
+//         AND punch_date BETWEEN DATEADD(DAY, -30, CAST(GETDATE() AS DATE)) 
+//                            AND DATEADD(DAY, -2, CAST(GETDATE() AS DATE))
+//         AND (
+//           user_id LIKE 'JC%' 
+//           OR user_id LIKE 'JIH%'
+//         );
+//     `);
+
+//     const validPunchRows = result3.recordset;
+
+//     // Build set from Step 1 + 2 (only those LabourIds with logs)
+//     const nullPunchSet = new Set(
+//       filteredNullPunchRows.map(row => `${row.LabourId}::${row.PunchDate}`)
+//     );
+
+//     // Match all (user_id, PunchDate) from Attendance that appear in the set
+//     const matchedResults = validPunchRows.filter(row =>
+//       nullPunchSet.has(`${row.user_id}::${row.PunchDate}`)
+//     );
+
+//     // ✅ Keep full list of duplicates — same user_id across multiple dates
+//     const finalMatchedIdsWithDates = matchedResults.map(row => ({
+//       user_id: row.user_id,
+//       date: row.PunchDate
+//     }));
+
+//     console.log("✅ Final Matches (Duplicates allowed):", finalMatchedIdsWithDates);
+//     return finalMatchedIdsWithDates;
+
+//   } catch (err) {
+//     console.error("❌ Error in getMatchedLabourIdsWithValidPunch:", err);
+//     throw err;
+//   }
+// };
+
+
 module.exports = {
     getAllLabours,
     createRecord,
@@ -1297,5 +1577,5 @@ module.exports = {
     exportWagesexcelSheet,
     exportMonthlyWagesExcel,
     exportFixedWagesExcel,
-
+getMatchedLabourIdsWithValidPunch
 }

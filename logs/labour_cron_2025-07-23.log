@@ -1,0 +1,22 @@
+[2025-07-23 11:16:36] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-23 11:16:48] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-23 11:25:50] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-23 11:25:58] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-23 11:26:01] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-23 11:26:09] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-23 17:10:00] [INFO] ⏰ Running all shift jobs sequentially...
+[2025-07-23 17:10:00] [INFO] Shift 1 (08:00 AM) - Job Started
+[2025-07-23 17:59:07] [INFO] Shift 1 (08:00 AM) - Success: {"success":false,"message":"Error comparing labour punch data","error":"Error fetching ProjectID by DeviceID"}
+[2025-07-23 17:59:07] [INFO] Shift 2 (11:00 AM) - Job Started
+[2025-07-23 17:59:07] [INFO] Shift 2 (11:00 AM) - Success: {"success":false,"message":"Error comparing labour punch data","error":"Failed to connect to 157.20.51.205:1433 - Could not connect (sequence)"}
+[2025-07-23 17:59:07] [INFO] Shift 3 (02:00 PM) - Job Started
+[2025-07-23 17:59:07] [INFO] Shift 3 (02:00 PM) - Success: {"success":false,"message":"Error comparing labour punch data","error":"Failed to connect to 157.20.51.205:1433 - Could not connect (sequence)"}
+[2025-07-23 17:59:07] [INFO] ✅ All shift jobs completed sequentially.
+[2025-07-23 18:39:00] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-23 18:39:09] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-23 18:39:44] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-23 18:39:54] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-23 18:54:44] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-23 18:54:46] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-23 18:54:51] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully
+[2025-07-23 18:55:04] [INFO] ⏰ Labour Sequential Cron Scheduled Successfully

@@ -79,4 +79,16 @@ router.get('/exportWagesExcel', insentiveController.exportWagesexcelSheet);
 // router.post('/generateMonthlyPayroll/:labourId', insentiveController.generateMonthlyPayrollForSingleLabour);
 
 
+//  router.get('/validPunches', insentiveController.getMatchedLabourIdsWithValidPunch);
+ router.get('/validPunches', async (req, res) => {
+  try {
+    const matchedIds = await insentiveController.getMatchedLabourIdsWithValidPunch();
+    res.status(200).json({ matchedIds });
+  } catch (error) {
+    console.error("API Error:", error);
+    res.status(500).json({ error: 'Failed to fetch matched labour IDs' });
+  }
+});
+
+
 module.exports = router;

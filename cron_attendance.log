@@ -368,3 +368,6 @@
 {"level":"info","message":"Running cron job for Attendance Date: 2025-06-11","timestamp":"2025-06-12T06:40:00.535Z"}
 {"level":"info","message":"Scheduled cron triggered...","timestamp":"2025-06-12T06:50:00.307Z"}
 {"level":"info","message":"Running cron job for Attendance Date: 2025-06-11","timestamp":"2025-06-12T06:50:00.314Z"}
+{"level":"info","message":"Scheduled cron triggered...","timestamp":"2025-07-11T06:50:00.426Z"}
+{"level":"info","message":"Running cron job for Attendance Date: 2025-07-10","timestamp":"2025-07-11T06:50:00.430Z"}
+{"level":"error","message":"Error running cron job for Date: 2025-07-10: approvedLabours is not iterable","stack":"TypeError: approvedLabours is not iterable\n    at runDailyAttendanceCron (C:\\Users\\Vaibhav Patil\\Desktop\\VJ_LabourApp_BackendNew\\backend\\controllers\\labourController.js:2021:28)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async Task._execution (C:\\Users\\Vaibhav Patil\\Desktop\\VJ_LabourApp_BackendNew\\backend\\controllers\\labourController.js:3512:5)","timestamp":"2025-07-11T09:03:21.103Z"}
